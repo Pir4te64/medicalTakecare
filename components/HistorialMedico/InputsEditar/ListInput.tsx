@@ -32,7 +32,7 @@ const ListField: React.FC<ListFieldProps> = ({
           inputStyle={styles.inputText}
           leftIcon={
             <Icon
-              name="remove-circle-outline"
+              name='remove-circle-outline'
               size={24}
               color={items.length > 1 ? "red" : "gray"} // Deshabilitado si solo hay 1 elemento
               onPress={items.length > 1 ? () => removeItem(index) : undefined} // No hace nada si es 1
@@ -40,9 +40,9 @@ const ListField: React.FC<ListFieldProps> = ({
           }
           rightIcon={
             <Icon
-              name="add-circle-outline"
+              name='add-circle-outline'
               size={24}
-              color="#007BFF"
+              color='#007BFF'
               onPress={addItem}
             />
           }
@@ -63,6 +63,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 8,
+    zIndex: 1,
   },
   inputContainer: {
     flex: 1,

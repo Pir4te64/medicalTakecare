@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { Text, ScrollView, View, Alert, TouchableOpacity } from "react-native";
+import {
+  Text,
+  ScrollView,
+  View,
+  Alert,
+  TouchableOpacity,
+  Platform,
+} from "react-native";
 import { styles } from "./InformacionStyles.styles";
 import AllergyInput from "../AllergicInput/AllergicInput";
 import DatePickerInput from "../DatePicker/DatePicker";
@@ -43,7 +50,15 @@ const RegisterDataForm: React.FC<RegisterDataFormProps> = ({ afiliado }) => {
     setField,
   } = useRegisterStore();
   const resetForm = useRegisterStore((state) => state.resetForm);
-
+  function showAlert(title: string, message: string) {
+    if (Platform.OS === "web") {
+      // En web usamos la alerta del navegador
+      window.alert(`${title}\n${message}`);
+    } else {
+      // En iOS/Android usamos Alert.alert de React Native
+      Alert.alert(title, message, [{ text: "OK" }]);
+    }
+  }
   useFocusEffect(
     React.useCallback(() => {
       resetForm();
@@ -78,17 +93,14 @@ const RegisterDataForm: React.FC<RegisterDataFormProps> = ({ afiliado }) => {
   const handleUpdateInfo = async () => {
     const currentState = useRegisterStore.getState();
     const updatedInfo = getUpdatedInfo(afiliado, currentState);
-    console.log("updatedInfo", JSON.stringify(updatedInfo, null, 2));
 
     try {
       await GuardarInfoActualizada(updatedInfo);
 
-      Alert.alert("✅ Éxito", "Los datos se actualizaron correctamente.", [
-        { text: "OK" },
-      ]);
+      showAlert("✅ Éxito", "Los datos se actualizaron correctamente.");
     } catch (error) {
       console.error("Error al actualizar la información:", error);
-      Alert.alert("Error", "Hubo un problema al actualizar los datos.");
+      showAlert("Error", "Hubo un problema al actualizar los datos.");
     }
   };
 
@@ -133,7 +145,7 @@ const RegisterDataForm: React.FC<RegisterDataFormProps> = ({ afiliado }) => {
 
       <View style={styles.Alergiascontainer}>
         <AllergyInput
-          title="Agregar Alergia a Medicamentos"
+          title='Agregar Alergia a Medicamentos'
           onDeleteAllergy={(allergy) =>
             handleDeleteAllergy(allergy, "medication")
           } // Pasar función de eliminación
@@ -150,8 +162,8 @@ const RegisterDataForm: React.FC<RegisterDataFormProps> = ({ afiliado }) => {
 
         <AllergyInput
           onDeleteAllergy={(allergy) => handleDeleteAllergy(allergy, "other")} // Pasar función de eliminación
-          title="Agregar Otras Alergias"
-          placeholder="Otras alergias"
+          title='Agregar Otras Alergias'
+          placeholder='Otras alergias'
           allergies={otherAllergies}
           availableAllergies={["Polen", "Acaros", "Latex"]}
           onAddAllergy={(allergy) =>
@@ -197,10 +209,9 @@ const RegisterDataForm: React.FC<RegisterDataFormProps> = ({ afiliado }) => {
               setField("medication", "");
               setField("dosage", "");
             } else {
-              Alert.alert(
+              showAlert(
                 "⚠️ Campos incompletos",
-                "Por favor, completa todos los campos necesarios antes de continuar.",
-                [{ text: "Aceptar" }]
+                "Por favor, completa todos los campos necesarios antes de continuar."
               );
             }
           }}
@@ -211,8 +222,7 @@ const RegisterDataForm: React.FC<RegisterDataFormProps> = ({ afiliado }) => {
       {isDataLoaded ? (
         <TouchableOpacity
           style={styles.submitButton}
-          onPress={handleUpdateInfo}
-        >
+          onPress={handleUpdateInfo}>
           <Text style={styles.submitButtonText}>Actualizar</Text>
         </TouchableOpacity>
       ) : (
@@ -232,14 +242,12 @@ const RegisterDataForm: React.FC<RegisterDataFormProps> = ({ afiliado }) => {
               );
             }
           }}
-          disabled={!isFormComplete()}
-        >
+          disabled={!isFormComplete()}>
           <Text
             style={[
               styles.submitButtonText,
               !isFormComplete() && { opacity: 0.5 },
-            ]}
-          >
+            ]}>
             Registrar
           </Text>
         </TouchableOpacity>

@@ -4,11 +4,11 @@ import { StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flexGrow: 1,
+    zIndex: 999,
     padding: 10,
     borderRadius: 8,
     marginVertical: 10,
-    backgroundColor: "#fff",
     shadowColor: "#000",
     shadowOffset: {
       width: 0,

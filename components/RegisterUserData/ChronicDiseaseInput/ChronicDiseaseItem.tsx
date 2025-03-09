@@ -1,7 +1,14 @@
-import React, { useEffect, useState } from "react";
-import { View, Alert, StyleSheet, TouchableOpacity, Text } from "react-native";
+import React, { useState } from "react";
+import {
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  Text,
+  Platform,
+} from "react-native";
 import { Input } from "react-native-elements";
 import { Ionicons } from "@expo/vector-icons";
+import { showAlert, showConfirm } from "@/components/Modal/showMessage";
 
 interface ChronicDiseaseItemProps {
   index: number;
@@ -12,8 +19,13 @@ interface ChronicDiseaseItemProps {
     medicalCenter: string;
     medicalTreatmentUser: { medication: string; dosage: string }[];
   };
-  onUpdate: (index: number, field: string, value: string) => void;
-  onDelete: (index: number) => Promise<boolean>;
+  onUpdate: (
+    index: number,
+    field: string,
+    value: string,
+    treatmentIndex?: number
+  ) => void;
+  onDelete: (id: number) => Promise<boolean>;
 }
 
 const ChronicDiseaseItem: React.FC<ChronicDiseaseItemProps> = ({
@@ -26,27 +38,19 @@ const ChronicDiseaseItem: React.FC<ChronicDiseaseItemProps> = ({
   const [isDeleted, setIsDeleted] = useState(false); // Estado para deshabilitar botón
 
   const handleDelete = async () => {
-    Alert.alert(
+    showConfirm(
       "Eliminar Enfermedad",
       "¿Estás seguro de que deseas eliminar esta enfermedad?",
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Eliminar",
-          onPress: async () => {
-            const success: boolean = await onDelete(diseaseData.id);
+      async () => {
+        const success: boolean = await onDelete(diseaseData.id);
 
-            if (success) {
-              setIsDeleted(true); // Desactiva el botón de eliminar
-              Alert.alert("✅ Éxito", "Enfermedad eliminada correctamente");
-            } else {
-              Alert.alert("❌ Error", "No se pudo eliminar la enfermedad");
-            }
-          },
-          style: "destructive",
-        },
-      ],
-      { cancelable: true }
+        if (success) {
+          setIsDeleted(true); // Desactiva el botón de eliminar
+          showAlert("✅ Éxito", "Enfermedad eliminada correctamente");
+        } else {
+          showAlert("❌ Error", "No se pudo eliminar la enfermedad");
+        }
+      }
     );
   };
 
@@ -55,34 +59,32 @@ const ChronicDiseaseItem: React.FC<ChronicDiseaseItemProps> = ({
       {/* Botón para expandir/cerrar */}
       <TouchableOpacity
         style={styles.header}
-        onPress={() => setIsExpanded(!isExpanded)}
-      >
+        onPress={() => setIsExpanded(!isExpanded)}>
         <Text style={styles.title}>{diseaseData.disease}</Text>
         <Ionicons
           name={isExpanded ? "chevron-up" : "chevron-down"}
           size={20}
-          color="#007BFF"
+          color='#007BFF'
         />
       </TouchableOpacity>
-      // En tu ChronicDiseaseItem
       {isExpanded && (
         <View style={styles.box}>
           <Input
-            label="Enfermedad"
+            label='Enfermedad'
             value={diseaseData.disease}
             onChangeText={(value) => onUpdate(index, "disease", value)}
             containerStyle={styles.inputContainer}
             inputStyle={styles.input}
           />
           <Input
-            label="Correo del Doctor"
+            label='Correo del Doctor'
             value={diseaseData.doctorEmail}
             onChangeText={(value) => onUpdate(index, "doctorEmail", value)}
             containerStyle={styles.inputContainer}
             inputStyle={styles.input}
           />
           <Input
-            label="Centro Médico"
+            label='Centro Médico'
             value={diseaseData.medicalCenter}
             onChangeText={(value) => onUpdate(index, "medicalCenter", value)}
             containerStyle={styles.inputContainer}
@@ -93,7 +95,7 @@ const ChronicDiseaseItem: React.FC<ChronicDiseaseItemProps> = ({
           {diseaseData.medicalTreatmentUser.map((treatment, i) => (
             <View key={i}>
               <Input
-                label="Medicamento"
+                label='Medicamento'
                 value={treatment.medication}
                 onChangeText={(value) =>
                   onUpdate(index, "medication", value, i)
@@ -102,12 +104,12 @@ const ChronicDiseaseItem: React.FC<ChronicDiseaseItemProps> = ({
                 inputStyle={styles.input}
               />
               <Input
-                label="Dosis"
+                label='Dosis'
                 value={treatment.dosage}
                 onChangeText={(value) => onUpdate(index, "dosage", value, i)} // Pasar el índice del tratamiento
                 containerStyle={styles.inputContainer}
                 inputStyle={styles.input}
-                keyboardType="numeric"
+                keyboardType='numeric'
               />
             </View>
           ))}
@@ -116,9 +118,8 @@ const ChronicDiseaseItem: React.FC<ChronicDiseaseItemProps> = ({
           <TouchableOpacity
             style={[styles.deleteButton, isDeleted && styles.disabledButton]}
             onPress={handleDelete}
-            disabled={isDeleted}
-          >
-            <Ionicons name="trash-bin-outline" size={20} color="white" />
+            disabled={isDeleted}>
+            <Ionicons name='trash-bin-outline' size={20} color='white' />
             <Text style={styles.deleteText}>
               {isDeleted ? "Eliminado" : "Eliminar"}
             </Text>
@@ -140,8 +141,8 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     padding: 12,
     borderRadius: 5,
-    borderColor: "#007BFF", // Added border color
-    borderWidth: 1, // Added border width
+    borderColor: "#007BFF",
+    borderWidth: 1,
   },
   title: {
     fontSize: 16,
@@ -153,8 +154,8 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 8,
     backgroundColor: "#f9f9f9",
-    borderColor: "#ddd", // Added border color
-    borderWidth: 1, // Added border width
+    borderColor: "#ddd",
+    borderWidth: 1,
   },
   inputContainer: {
     marginBottom: 10,
@@ -173,7 +174,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   disabledButton: {
-    backgroundColor: "#ccc", // Color para el botón deshabilitado
+    backgroundColor: "#ccc",
   },
   deleteText: {
     color: "white",
