@@ -91,7 +91,16 @@ const PerfilSecundario: React.FC<PerfilSecundarioProps> = ({
     },
     [router]
   );
-
+  const navigateToVisual = useCallback(
+    (afiliado: Afiliado) => {
+      router.push(
+        `/home/profile/visual?afiliado=${encodeURIComponent(
+          JSON.stringify(afiliado)
+        )}`
+      );
+    },
+    [router]
+  );
   if (!afiliados || afiliados.length === 0) {
     return <Text style={styles.noAfiliados}>No tiene afiliados.</Text>;
   }
@@ -111,6 +120,7 @@ const PerfilSecundario: React.FC<PerfilSecundarioProps> = ({
           navigateToInformation={navigateToInformation}
           navigateToContactos={navigateToContactos}
           navigateToHistorial={navigateToHistorial}
+          navigateToVisual={navigateToVisual}
         />
       ))}
 

@@ -14,6 +14,7 @@ const AfiliadoItem: React.FC<AfiliadoItemProps> = ({
   navigateToInformation,
   navigateToContactos,
   navigateToHistorial,
+  navigateToVisual,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -22,13 +23,12 @@ const AfiliadoItem: React.FC<AfiliadoItemProps> = ({
       {/* Botón para expandir/cerrar */}
       <TouchableOpacity
         style={styles.afiliadoHeader}
-        onPress={() => setIsExpanded(!isExpanded)}
-      >
+        onPress={() => setIsExpanded(!isExpanded)}>
         <Text style={styles.afiliadoName}>{afiliado.nombre}</Text>
         <Ionicons
           name={isExpanded ? "chevron-up-outline" : "chevron-down-outline"}
           size={24}
-          color="black"
+          color='black'
         />
       </TouchableOpacity>
 
@@ -36,11 +36,11 @@ const AfiliadoItem: React.FC<AfiliadoItemProps> = ({
       {isExpanded && (
         <TouchableOpacity activeOpacity={1} style={styles.afiliadoContent}>
           <View style={styles.afiliadoInfo}>
-            <Ionicons name="card" size={16} color="#0066cc" />
+            <Ionicons name='card' size={16} color='#0066cc' />
             <Text style={styles.afiliadoText}> DNI: {afiliado.documento}</Text>
           </View>
           <View style={styles.afiliadoInfo}>
-            <Ionicons name="shield-outline" size={16} color="#0066cc" />
+            <Ionicons name='shield-outline' size={16} color='#0066cc' />
             <Text style={styles.afiliadoText}>
               Tipo de Usuario: {afiliado.tipoUsuario}
             </Text>
@@ -55,28 +55,25 @@ const AfiliadoItem: React.FC<AfiliadoItemProps> = ({
           <View style={styles.iconsColumn}>
             <TouchableOpacity
               style={styles.iconRow}
-              onPress={() => handlePasswordUpdate(afiliado)}
-            >
-              <Ionicons name="key-outline" size={24} color="#0066cc" />
+              onPress={() => handlePasswordUpdate(afiliado)}>
+              <Ionicons name='key-outline' size={24} color='#0066cc' />
               <Text style={styles.iconText}>Actualizar Contraseña</Text>
             </TouchableOpacity>
             {perfilSuper !== "D" && (
               <>
                 <TouchableOpacity
                   style={styles.iconRow}
-                  onPress={() => actualizarAfiliado(afiliado)}
-                >
-                  <Ionicons name="build-outline" size={24} color="#0066cc" />
+                  onPress={() => actualizarAfiliado(afiliado)}>
+                  <Ionicons name='build-outline' size={24} color='#0066cc' />
                   <Text style={styles.iconText}>Actualizar Datos</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.iconRow}
-                  onPress={() => navigateToInformation(afiliado)}
-                >
+                  onPress={() => navigateToInformation(afiliado)}>
                   <Ionicons
-                    name="clipboard-outline"
+                    name='clipboard-outline'
                     size={24}
-                    color="#0066cc"
+                    color='#0066cc'
                   />
                   <Text style={styles.iconText}>Información</Text>
                 </TouchableOpacity>
@@ -84,31 +81,33 @@ const AfiliadoItem: React.FC<AfiliadoItemProps> = ({
             )}
             <TouchableOpacity
               style={styles.iconRow}
-              onPress={() => handleUserDataUpdate(afiliado)}
-            >
-              <Ionicons name="person-outline" size={24} color="#0066cc" />
+              onPress={() => handleUserDataUpdate(afiliado)}>
+              <Ionicons name='person-outline' size={24} color='#0066cc' />
               <Text style={styles.iconText}>Editar Usuario</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.iconRow}
-              onPress={() => navigateToDetail(afiliado)}
-            >
-              <Ionicons name="eye-outline" size={24} color="#0066cc" />
+              onPress={() => navigateToDetail(afiliado)}>
+              <Ionicons name='eye-outline' size={24} color='#0066cc' />
               <Text style={styles.iconText}>Ver Detalles</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.iconRow}
-              onPress={() => navigateToContactos(afiliado)}
-            >
-              <Ionicons name="call-outline" size={24} color="#0066cc" />
+              onPress={() => navigateToContactos(afiliado)}>
+              <Ionicons name='call-outline' size={24} color='#0066cc' />
               <Text style={styles.iconText}>Contactos</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.iconRow}
-              onPress={() => navigateToHistorial(afiliado)}
-            >
-              <Ionicons name="time-outline" size={24} color="#0066cc" />
+              onPress={() => navigateToHistorial(afiliado)}>
+              <Ionicons name='time-outline' size={24} color='#0066cc' />
               <Text style={styles.iconText}>Historial</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.iconRow}
+              onPress={() => navigateToVisual(afiliado)}>
+              <Ionicons name='stats-chart-outline' size={24} color='#0066cc' />
+              <Text style={styles.iconText}>Visual</Text>
             </TouchableOpacity>
           </View>
         </TouchableOpacity>
