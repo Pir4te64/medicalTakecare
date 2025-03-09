@@ -5,13 +5,13 @@ import {
   Alert,
   ScrollView,
   ActivityIndicator,
+  Platform,
 } from "react-native";
 import { Button, Text } from "react-native-elements";
 import * as DocumentPicker from "expo-document-picker";
 import RNPickerSelect from "react-native-picker-select";
 import { router, useNavigation } from "expo-router"; // Importar el componente Link
 import handleSubmitIA from "@/components/Detalles/indexPOST"; // Importar la función de envío
-import { Ionicons } from "@expo/vector-icons";
 export default function Lector() {
   const [selectedOption, setSelectedOption] = useState("LABORATORY");
   const [pdfFile, setPdfFile] = useState(null);
@@ -68,23 +68,53 @@ export default function Lector() {
         <Text h4 style={styles.headerText}>
           Envio de Datos:
         </Text>
-        <RNPickerSelect
-          placeholder={{ label: "Selecciona una opción...", value: null }}
-          onValueChange={(value) => setSelectedOption(value)}
-          items={[
-            { label: "Examenes de laboratorios", value: "LABORATORY" },
-            { label: "Recetas", value: "RECIPE" },
-            { label: "Informes de imagenes", value: "IMAGENOLOGY" },
-          ]}
-          value={selectedOption}
-          style={pickerSelectStyles}
-        />
+
+        {Platform.OS === "web" ? (
+          // WEB: <select> HTML nativo
+          <select
+            value={selectedOption}
+            onChange={(e) => setSelectedOption(e.target.value)}
+            style={{
+              // aplica estilo al <select> (similar a input date)
+              fontSize: 16,
+              padding: 8,
+              marginBottom: 20,
+              borderWidth: 1,
+              borderColor: "#ddd",
+              borderRadius: 10,
+              color: "#333",
+              backgroundColor: "#fff",
+              width: "100%",
+              // mas estilos si quieres
+            }}>
+            {/* Placeholder */}
+            <option value='' disabled>
+              Selecciona una opción...
+            </option>
+            <option value='LABORATORY'>Examenes de laboratorios</option>
+            <option value='RECIPE'>Recetas</option>
+            <option value='IMAGENOLOGY'>Informes de imágenes</option>
+          </select>
+        ) : (
+          // MÓVIL: RNPickerSelect
+          <RNPickerSelect
+            placeholder={{ label: "Selecciona una opción...", value: null }}
+            onValueChange={setSelectedOption}
+            items={[
+              { label: "Examenes de laboratorios", value: "LABORATORY" },
+              { label: "Recetas", value: "RECIPE" },
+              { label: "Informes de imagenes", value: "IMAGENOLOGY" },
+            ]}
+            value={selectedOption}
+            style={pickerSelectStyles}
+          />
+        )}
 
         <Text h4 style={styles.headerText}>
           Selecciona un archivo PDF:
         </Text>
         <Button
-          title="Seleccionar PDF"
+          title='Seleccionar PDF'
           onPress={handleFilePick}
           buttonStyle={styles.button}
         />
@@ -96,10 +126,10 @@ export default function Lector() {
         )}
 
         {loading ? (
-          <ActivityIndicator size="large" color="#28a745" />
+          <ActivityIndicator size='large' color='#28a745' />
         ) : (
           <Button
-            title="Enviar"
+            title='Enviar'
             onPress={handleSend}
             buttonStyle={styles.submitButton}
             disabled={!pdfFile || loading}
@@ -112,7 +142,7 @@ export default function Lector() {
 
         <Button
           containerStyle={{ alignItems: "center", width: "100%" }}
-          title="Información detallada"
+          title='Información detallada'
           buttonStyle={styles.detailsButton}
           onPress={() => {
             router.push("/home/lector/detalles");

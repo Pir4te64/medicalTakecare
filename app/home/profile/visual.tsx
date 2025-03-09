@@ -1,5 +1,7 @@
 import getInfo from "@/components/DetalleInformes/Detalles.GetInfo";
 import { getHistorialByUser } from "@/components/HistorialMedico/getHistorialByUser";
+import MyLineChart from "@/components/Visual/MyLineChart";
+import FilterBar from "@/components/Visual/VIsualCalendarioSelector";
 import { Afiliado } from "@/utils/types";
 import { useLocalSearchParams } from "expo-router";
 import React, { useState, useEffect } from "react";
@@ -7,7 +9,7 @@ import {
   Text,
   View,
   ActivityIndicator,
-  FlatList,
+  ScrollView,
   StyleSheet,
   TextInput,
   Platform,
@@ -39,7 +41,6 @@ const Visual = () => {
           if (response && response.success) {
             const userDataId = response.data.body.userDataId;
             setData(userDataId);
-            // Llamada a getHistorialByUser y almacenar el resultado en el estado
             getHistorialByUser(userDataId)
               .then((historialData) => {
                 console.log("Historial Data:", historialData);
@@ -102,84 +103,34 @@ const Visual = () => {
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Visual</Text>
-      {/* Filtros de fecha */}
-      <View style={styles.filterContainer}>
-        <Text>Desde:</Text>
-        {Platform.OS === "web" ? (
-          <input
-            type='date'
-            value={fechaDesde}
-            onChange={(e) => setFechaDesde(e.target.value)}
-            style={styles.input}
-          />
-        ) : (
-          <TextInput
-            style={styles.input}
-            placeholder='YYYY-MM-DD'
-            value={fechaDesde}
-            onChangeText={setFechaDesde}
-          />
-        )}
+    <ScrollView style={styles.scrollContainer}>
+      <View style={styles.container}>
+        <Text style={styles.title}>Visual</Text>
 
-        <Text>Hasta:</Text>
-        {Platform.OS === "web" ? (
-          <input
-            type='date'
-            value={fechaHasta}
-            onChange={(e) => setFechaHasta(e.target.value)}
-            style={styles.input}
-          />
-        ) : (
-          <TextInput
-            style={styles.input}
-            placeholder='YYYY-MM-DD'
-            value={fechaHasta}
-            onChangeText={setFechaHasta}
-          />
-        )}
+        {/* Aquí usamos nuestro componente FilterBar */}
+        <FilterBar
+          fechaDesde={fechaDesde}
+          fechaHasta={fechaHasta}
+          setFechaDesde={setFechaDesde}
+          setFechaHasta={setFechaHasta}
+          handleClearFilters={handleClearFilters}
+        />
 
-        {/* Botón para limpiar filtros */}
-        {Platform.OS === "web" ? (
-          <button
-            type='button'
-            onClick={handleClearFilters}
-            style={styles.clearButtonWeb}>
-            Limpiar
-          </button>
-        ) : (
-          <TouchableOpacity
-            style={styles.clearButton}
-            onPress={handleClearFilters}>
-            <Text style={styles.clearButtonText}>Limpiar</Text>
-          </TouchableOpacity>
-        )}
+        <MyLineChart historialData={filteredHistorial} />
       </View>
-
-      <Text style={styles.subtitle}>Historial:</Text>
-      <FlatList
-        data={filteredHistorial}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View style={styles.itemContainer}>
-            <Text style={styles.itemTitle}>Especialidad: {item.specialty}</Text>
-            <Text>Fecha: {item.date}</Text>
-            <Text>Médico Tratante: {item.treatingPhysician}</Text>
-            <Text>Síntomas: {item.originalSymptoms.join(", ")}</Text>
-            <Text>Diagnósticos: {item.diagnoses.join(", ")}</Text>
-            {/* Puedes agregar aquí más detalles, como tratamientos, seguimientos y órdenes */}
-          </View>
-        )}
-      />
-    </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
+  scrollContainer: {
+    flex: 1,
+    width: "100%",
+  },
   container: {
     padding: 20,
-    flex: 1,
+    width: "85%",
+    marginHorizontal: "auto",
   },
   centered: {
     flex: 1,
@@ -190,54 +141,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "bold",
     marginBottom: 10,
-  },
-  subtitle: {
-    fontSize: 16,
-    fontWeight: "bold",
-    marginVertical: 10,
-  },
-  filterContainer: {
-    marginBottom: 20,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 5,
-    padding: 8,
-    marginVertical: 5,
-    width: "100%",
-  },
-  clearButton: {
-    backgroundColor: "#0066cc",
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 5,
-    marginTop: 10,
-  },
-  clearButtonText: {
-    color: "#fff",
-    fontWeight: "bold",
-    textAlign: "center",
-  },
-  clearButtonWeb: {
-    cursor: "pointer",
-    backgroundColor: "#0066cc",
-    border: "none",
-    color: "#fff",
-    padding: "8px 12px",
-    borderRadius: 5,
-    marginTop: 10,
-  },
-  itemContainer: {
-    marginBottom: 15,
-    padding: 10,
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 5,
-  },
-  itemTitle: {
-    fontWeight: "bold",
-    marginBottom: 5,
   },
 });
 
