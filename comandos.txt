@@ -1,2 +1,3 @@
 eas build -p android --profile production 
 eas build -p android --profile preview
+eas deploy --prod
