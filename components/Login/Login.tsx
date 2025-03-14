@@ -46,10 +46,11 @@ export default function LoginComponent() {
       const data: ApiResponse = await response.json();
 
       if (response.ok && data.success) {
-        const { token, refreshToken } = data.body!;
+        const { token, refreshToken, role } = data.body!;
         if (token && refreshToken) {
           await AsyncStorage.setItem("authToken", token);
           await AsyncStorage.setItem("refreshToken", refreshToken);
+          await AsyncStorage.setItem("role", role);
 
           setAlertMessage("Inicio de sesión exitoso.");
           setAlertVisible(true);
@@ -95,19 +96,18 @@ export default function LoginComponent() {
         paddingTop: 20,
         paddingBottom: 30,
         alignItems: "center",
-      }}
-    >
+      }}>
       <CustomAlert
         visible={alertVisible}
         onClose={() => setAlertVisible(false)}
-        title="Mensaje"
+        title='Mensaje'
         message={alertMessage}
       />
 
       <View style={{ width: "80%" }}>
         <Text style={{ marginTop: 5 }}>Usuario "RUT"</Text>
         <Input
-          placeholder="Ingrese su RUT"
+          placeholder='Ingrese su RUT'
           onChangeText={formik.handleChange("username")}
           onBlur={formik.handleBlur("username")}
           value={formik.values.username}
@@ -119,9 +119,9 @@ export default function LoginComponent() {
           }
           leftIcon={
             <MaterialIcons
-              name="person"
+              name='person'
               size={24}
-              color="#0066cc"
+              color='#0066cc'
               style={{ marginRight: 5 }}
             />
           }
@@ -129,7 +129,7 @@ export default function LoginComponent() {
 
         <Text style={{ marginTop: 5 }}>Contraseña:</Text>
         <Input
-          placeholder="Contraseña"
+          placeholder='Contraseña'
           secureTextEntry={!showPassword}
           onChangeText={formik.handleChange("password")}
           onBlur={formik.handleBlur("password")}
@@ -142,9 +142,9 @@ export default function LoginComponent() {
           }
           leftIcon={
             <MaterialIcons
-              name="lock"
+              name='lock'
               size={24}
-              color="#0066cc"
+              color='#0066cc'
               style={{ marginRight: 5 }}
             />
           }
@@ -152,7 +152,7 @@ export default function LoginComponent() {
             <MaterialCommunityIcons
               name={showPassword ? "eye" : "eye-off"}
               size={24}
-              color="#0066cc"
+              color='#0066cc'
               onPress={() => setShowPassword(!showPassword)}
             />
           }
@@ -182,8 +182,7 @@ export default function LoginComponent() {
               textAlign: "center",
               marginTop: 15,
               fontSize: 16,
-            }}
-          >
+            }}>
             ¿No tienes una cuenta? Regístrate aquí
           </Text>
         </TouchableOpacity>

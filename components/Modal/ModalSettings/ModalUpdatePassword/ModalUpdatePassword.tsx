@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Modal, View, Text, StyleSheet, Alert } from "react-native";
+import React, { useState, useEffect } from "react";
+import { Modal, View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import UpdatePasswordForm from "./Formulario"; // Ajusta la ruta según tu estructura
 import { actualizarContrasena } from "./ModalUP.data";
 
@@ -16,83 +16,119 @@ const ModalUpdatePassword: React.FC<ModalUpdatePasswordProps> = ({
   afiliado,
   reloadProfile,
 }) => {
-  const [passwordsMatch, setPasswordsMatch] = useState<boolean>(true);
+  const [updateResult, setUpdateResult] = useState<{
+    status: "success" | "error";
+    message: string;
+  } | null>(null);
+
+  const [isUpdating, setIsUpdating] = useState(false);
 
   const handleSubmit = async (values: {
     newPassword: string;
     confirmPassword: string;
   }) => {
+    // Validación de contraseñas
+    if (values.newPassword !== values.confirmPassword) {
+      console.log("Las contraseñas no coinciden");
+      setUpdateResult({
+        status: "error",
+        message:
+          "⚠️ Las contraseñas no coinciden.\n\nPor favor, verifica e intenta nuevamente.",
+      });
+      return;
+    }
+
+    if (!afiliado?.seudonimo) {
+      setUpdateResult({
+        status: "error",
+        message: "El seudónimo del afiliado es requerido.",
+      });
+      return;
+    }
+
+    setIsUpdating(true);
     try {
-      if (values.newPassword !== values.confirmPassword) {
-        console.log("Las contraseñas no coinciden");
-        setPasswordsMatch(false);
-        Alert.alert(
-          "❌ Error",
-          "⚠️ Las contraseñas no coinciden.\n\nPor favor, verifica e intenta nuevamente."
-        );
-        return;
-      } else {
-        setPasswordsMatch(true);
-      }
-
-      if (!afiliado?.seudonimo) {
-        throw new Error("El seudónimo del afiliado es requerido");
-      }
-
-      const result = await actualizarContrasena(
+      await actualizarContrasena(
         values.newPassword,
         values.confirmPassword,
         afiliado.seudonimo,
-        passwordsMatch
+        true // Dado que ya validamos que coinciden
       );
-
-      // Mostrar alerta de éxito con icono y mensaje mejorado
-      Alert.alert(
-        "✅ ¡Contraseña actualizada!",
-        "🔒 Tu contraseña se ha cambiado correctamente.\n\nSe recargará el perfil en breve.",
-        [
-          {
-            text: "OK",
-            onPress: () => {
-              onClose();
-              setTimeout(() => {
-                reloadProfile();
-              }, 2000);
-            },
-          },
-        ],
-        { cancelable: false }
-      );
+      setUpdateResult({
+        status: "success",
+        message:
+          "🔒 Tu contraseña se ha cambiado correctamente.\n\nSe recargará el perfil en breve.",
+      });
     } catch (error) {
       console.error("Error al actualizar la contraseña:", error);
-      Alert.alert(
-        "❌ Error",
-        "⚠️ Ocurrió un error al actualizar la contraseña.\n\nInténtalo nuevamente.",
-        [{ text: "OK", onPress: onClose }]
-      );
+      setUpdateResult({
+        status: "error",
+        message:
+          "⚠️ Ocurrió un error al actualizar la contraseña.\n\nInténtalo nuevamente.",
+      });
+    }
+    setIsUpdating(false);
+  };
+
+  const handleFeedbackClose = () => {
+    onClose();
+    if (updateResult?.status === "success") {
+      setTimeout(() => {
+        reloadProfile();
+      }, 2000);
     }
   };
 
+  // Reiniciamos el estado cuando se cierra el modal para que se vuelva a mostrar el formulario
+  useEffect(() => {
+    if (!visible) {
+      setUpdateResult(null);
+    }
+  }, [visible]);
+
   return (
     <Modal
-      animationType="fade"
+      animationType='fade'
       transparent={true}
       visible={visible}
-      onRequestClose={onClose}
-    >
+      onRequestClose={onClose}>
       <View style={styles.modalContainer}>
         <View style={styles.modalContent}>
-          <Text style={styles.modalTitle}>Actualizar Contraseña</Text>
-          {afiliado ? (
-            <Text style={styles.afiliadoInfo}>
-              {`Afiliado seleccionado: ${afiliado.nombre}`}
-            </Text>
+          {updateResult ? (
+            // Mostramos el mensaje de feedback (éxito o error)
+            <>
+              <Text style={styles.modalTitle}>
+                {updateResult.status === "success"
+                  ? "✅ ¡Contraseña actualizada!"
+                  : "❌ Error"}
+              </Text>
+              <Text style={styles.modalMessage}>{updateResult.message}</Text>
+              <TouchableOpacity
+                style={styles.feedbackButton}
+                onPress={handleFeedbackClose}>
+                <Text style={styles.feedbackButtonText}>OK</Text>
+              </TouchableOpacity>
+            </>
           ) : (
-            <Text style={styles.afiliadoInfo}>
-              No se ha seleccionado un afiliado.
-            </Text>
+            // Mostramos el formulario para actualizar la contraseña
+            <>
+              <Text style={styles.modalTitle}>Actualizar Contraseña</Text>
+              {afiliado ? (
+                <Text style={styles.afiliadoInfo}>
+                  {`Afiliado seleccionado: ${afiliado.nombre}`}
+                </Text>
+              ) : (
+                <Text style={styles.afiliadoInfo}>
+                  No se ha seleccionado un afiliado.
+                </Text>
+              )}
+              <UpdatePasswordForm
+                onSubmit={handleSubmit}
+                onCancel={onClose}
+                isUpdating={isUpdating} // Opcional: para deshabilitar botones durante la actualización
+              />
+            </>
           )}
-          <UpdatePasswordForm onSubmit={handleSubmit} onCancel={onClose} />
         </View>
       </View>
     </Modal>
@@ -122,6 +158,21 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginBottom: 15,
     color: "#555",
+  },
+  modalMessage: {
+    fontSize: 16,
+    textAlign: "center",
+    marginBottom: 20,
+  },
+  feedbackButton: {
+    backgroundColor: "#007BFF",
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 5,
+  },
+  feedbackButtonText: {
+    color: "white",
+    fontSize: 16,
   },
 });
 

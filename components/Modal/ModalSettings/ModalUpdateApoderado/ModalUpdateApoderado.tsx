@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, Modal, TouchableOpacity, Alert } from "react-native";
+import { View, Text, Modal, TouchableOpacity } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { stylesModal } from "./ModalUpdateAPoderado.styles";
 import { API } from "@/utils/api";
@@ -28,6 +28,11 @@ const ModalUpdateAPoderado: React.FC<ModalUpdateAPoderadoProps> = ({
   reloadProfile,
 }) => {
   const [tipoUsuario, setTipoUsuario] = useState<string | null>(null);
+  const [updateResult, setUpdateResult] = useState<{
+    status: "success" | "error";
+    message: string;
+  } | null>(null);
+  const [isUpdating, setIsUpdating] = useState(false);
 
   useEffect(() => {
     const obtenerTipoSeleccionado = async () => {
@@ -37,15 +42,20 @@ const ModalUpdateAPoderado: React.FC<ModalUpdateAPoderadoProps> = ({
 
     if (visible) {
       obtenerTipoSeleccionado();
+      // Reiniciamos el resultado cada vez que se muestra el modal
+      setUpdateResult(null);
     }
   }, [visible]);
 
-  // Función de envío de datos
+  // Función que realiza la actualización
   const handleUpdate = async () => {
+    setIsUpdating(true);
     try {
       const token = await AsyncStorage.getItem("authToken");
       if (!token) {
         console.log("Token no encontrado");
+        setUpdateResult({ status: "error", message: "Token no encontrado" });
+        setIsUpdating(false);
         return;
       }
 
@@ -68,63 +78,89 @@ const ModalUpdateAPoderado: React.FC<ModalUpdateAPoderadoProps> = ({
       });
 
       const data = await response.json();
-      console.log("Respuesta de la API:", data); // Verifica la respuesta de la API
+      console.log("Respuesta de la API:", data);
 
       if (response.ok) {
-        Alert.alert(
-          "✅ ¡Éxito!",
-          "Datos actualizados correctamente.",
-          [
-            {
-              text: "OK",
-              onPress: () => {
-                onClose();
-                setTimeout(() => {
-                  reloadProfile();
-                }, 2000);
-              },
-            },
-          ],
-          { cancelable: false }
-        );
+        setUpdateResult({
+          status: "success",
+          message: "Datos actualizados correctamente.",
+        });
       } else {
-        Alert.alert(
-          "❌ Error",
-          data.message || "Error al actualizar.",
-          [{ text: "OK", onPress: () => onClose() }],
-          { cancelable: false }
-        );
+        setUpdateResult({
+          status: "error",
+          message: data.message || "Error al actualizar.",
+        });
       }
     } catch (error) {
-      console.error("Error al realizar la solicitud:", error);
-      Alert.alert("Error", "Ocurrió un error al procesar la solicitud.");
+      console.error("Error en la solicitud:", error);
+      setUpdateResult({
+        status: "error",
+        message: "Ocurrió un error al procesar la solicitud.",
+      });
+    }
+    setIsUpdating(false);
+  };
+
+  // Función para cerrar el modal
+  const handleClose = () => {
+    onClose();
+    // Si la actualización fue exitosa, recargamos el perfil
+    if (updateResult?.status === "success") {
+      setTimeout(() => {
+        reloadProfile();
+      }, 2000);
     }
   };
 
   return (
-    <Modal transparent visible={visible} animationType="fade">
+    <Modal transparent visible={visible} animationType='fade'>
       <View style={stylesModal.modalContainer}>
         <View style={stylesModal.modalContent}>
-          <Text style={stylesModal.modalTitle}>Seguro que deseas cambiar?</Text>
-          <Text style={stylesModal.modalText}>
-            Has escogido: {tipoUsuario || tipoSeleccionado || "No seleccionado"}
-          </Text>
-          <Text style={stylesModal.modalText}>
-            Pseudónimo: {afiliado?.seudonimo || "No asignado"}
-          </Text>
+          {updateResult ? (
+            // Mostrar mensaje de resultado
+            <>
+              <Text style={stylesModal.modalTitle}>
+                {updateResult.status === "success" ? "✅ ¡Éxito!" : "❌ Error"}
+              </Text>
+              <Text style={stylesModal.modalText}>{updateResult.message}</Text>
+              <TouchableOpacity
+                style={stylesModal.closeButton}
+                onPress={handleClose}>
+                <Text style={stylesModal.closeButtonText}>OK</Text>
+              </TouchableOpacity>
+            </>
+          ) : (
+            // Mostrar contenido de confirmación
+            <>
+              <Text style={stylesModal.modalTitle}>
+                ¿Seguro que deseas cambiar?
+              </Text>
+              <Text style={stylesModal.modalText}>
+                Has escogido:{" "}
+                {tipoUsuario || tipoSeleccionado || "No seleccionado"}
+              </Text>
+              <Text style={stylesModal.modalText}>
+                Pseudónimo: {afiliado?.seudonimo || "No asignado"}
+              </Text>
 
-          <View style={stylesModal.buttonsContainer}>
-            <TouchableOpacity style={stylesModal.closeButton} onPress={onClose}>
-              <Text style={stylesModal.closeButtonText}>Cerrar</Text>
-            </TouchableOpacity>
+              <View style={stylesModal.buttonsContainer}>
+                <TouchableOpacity
+                  style={stylesModal.closeButton}
+                  onPress={onClose}>
+                  <Text style={stylesModal.closeButtonText}>Cerrar</Text>
+                </TouchableOpacity>
 
-            <TouchableOpacity
-              style={stylesModal.updateButton}
-              onPress={handleUpdate}
-            >
-              <Text style={stylesModal.updateButtonText}>Actualizar</Text>
-            </TouchableOpacity>
-          </View>
+                <TouchableOpacity
+                  style={stylesModal.updateButton}
+                  onPress={handleUpdate}
+                  disabled={isUpdating}>
+                  <Text style={stylesModal.updateButtonText}>
+                    {isUpdating ? "Actualizando..." : "Actualizar"}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </>
+          )}
         </View>
       </View>
     </Modal>

@@ -11,7 +11,7 @@ export default function HomeLayout() {
   useEffect(() => {
     const fetchTipoCuenta = async () => {
       try {
-        const storedTipo = await AsyncStorage.getItem("tipoCuenta");
+        const storedTipo = await AsyncStorage.getItem("role");
         setTipoCuenta(storedTipo);
       } catch (error) {
         console.error("Error al obtener tipoCuenta:", error);

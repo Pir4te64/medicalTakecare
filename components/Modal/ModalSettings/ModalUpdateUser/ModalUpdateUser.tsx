@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   Modal,
   View,
@@ -6,7 +6,6 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  Alert,
 } from "react-native";
 import { Formik } from "formik";
 import * as Yup from "yup";
@@ -20,15 +19,27 @@ interface ModalUpdateUserProps {
     name: string;
     document: string;
   };
-  reloadProfile: () => void; // Agregar esta prop
+  reloadProfile: () => void;
 }
 
 const ModalUpdateUser: React.FC<ModalUpdateUserProps> = ({
   visible,
   onClose,
   user,
-  reloadProfile, // Agregar esta prop
+  reloadProfile,
 }) => {
+  const [updateResult, setUpdateResult] = useState<{
+    status: "success" | "error";
+    message: string;
+  } | null>(null);
+
+  // Reiniciamos el feedback cada vez que se muestra el modal
+  useEffect(() => {
+    if (!visible) {
+      setUpdateResult(null);
+    }
+  }, [visible]);
+
   const handleSubmit = async (values: { name: string }) => {
     try {
       const authToken = await AsyncStorage.getItem("authToken");
@@ -57,81 +68,98 @@ const ModalUpdateUser: React.FC<ModalUpdateUserProps> = ({
         );
       }
 
-      Alert.alert(
-        "✅ ¡Datos actualizados!",
-        "📝 La información del usuario se actualizó correctamente.",
-        [
-          {
-            text: "Aceptar",
-            onPress: () => {
-              onClose();
-              reloadProfile();
-            },
-          },
-        ]
-      );
+      setUpdateResult({
+        status: "success",
+        message: "📝 La información del usuario se actualizó correctamente.",
+      });
     } catch (error: any) {
-      Alert.alert(
-        "❌ Error",
-        error.message ||
-          "⚠️ Ocurrió un error al actualizar el usuario.\n\nInténtalo nuevamente más tarde."
-      );
+      setUpdateResult({
+        status: "error",
+        message:
+          error.message ||
+          "⚠️ Ocurrió un error al actualizar el usuario.\n\nInténtalo nuevamente más tarde.",
+      });
+    }
+  };
+
+  const handleFeedbackClose = () => {
+    onClose();
+    if (updateResult?.status === "success") {
+      reloadProfile();
     }
   };
 
   return (
     <Modal
-      animationType="fade"
+      animationType='fade'
       transparent
       visible={visible}
-      onRequestClose={onClose}
-    >
+      onRequestClose={onClose}>
       <View style={styles.modalContainer}>
         <View style={styles.modalContent}>
-          <Text style={styles.modalTitle}>Actualizar Datos del Usuario</Text>
-          <Formik
-            initialValues={{ name: user?.name || "" }}
-            validationSchema={Yup.object({
-              name: Yup.string().required("El nombre es requerido"),
-            })}
-            onSubmit={handleSubmit}
-          >
-            {({
-              values,
-              handleChange,
-              handleBlur,
-              handleSubmit,
-              errors,
-              touched,
-            }) => (
-              <>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Nombre"
-                  value={values.name}
-                  onChangeText={handleChange("name")}
-                  onBlur={handleBlur("name")}
-                />
-                {touched.name && errors.name && (
-                  <Text style={styles.errorText}>{errors.name}</Text>
+          {updateResult ? (
+            // Mostrar el mensaje de feedback (éxito o error)
+            <>
+              <Text style={styles.modalTitle}>
+                {updateResult.status === "success"
+                  ? "✅ ¡Datos actualizados!"
+                  : "❌ Error"}
+              </Text>
+              <Text style={styles.feedbackMessage}>{updateResult.message}</Text>
+              <TouchableOpacity
+                style={styles.feedbackButton}
+                onPress={handleFeedbackClose}>
+                <Text style={styles.buttonText}>Aceptar</Text>
+              </TouchableOpacity>
+            </>
+          ) : (
+            // Mostrar el formulario para actualizar datos del usuario
+            <>
+              <Text style={styles.modalTitle}>
+                Actualizar Datos del Usuario
+              </Text>
+              <Formik
+                initialValues={{ name: user?.name || "" }}
+                validationSchema={Yup.object({
+                  name: Yup.string().required("El nombre es requerido"),
+                })}
+                onSubmit={handleSubmit}>
+                {({
+                  values,
+                  handleChange,
+                  handleBlur,
+                  handleSubmit,
+                  errors,
+                  touched,
+                }) => (
+                  <>
+                    <TextInput
+                      style={styles.input}
+                      placeholder='Nombre'
+                      value={values.name}
+                      onChangeText={handleChange("name")}
+                      onBlur={handleBlur("name")}
+                    />
+                    {touched.name && errors.name && (
+                      <Text style={styles.errorText}>{errors.name}</Text>
+                    )}
+                    <View style={styles.buttonsContainer}>
+                      <TouchableOpacity
+                        style={[styles.button, styles.cancelButton]}
+                        onPress={onClose}>
+                        <Text style={styles.buttonText}>Cancelar</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={[styles.button, styles.updateButton]}
+                        onPress={() => handleSubmit()}>
+                        <Text style={styles.buttonText}>Actualizar</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </>
                 )}
-                <View style={styles.buttonsContainer}>
-                  <TouchableOpacity
-                    style={[styles.button, styles.cancelButton]}
-                    onPress={onClose}
-                  >
-                    <Text style={styles.buttonText}>Cancelar</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={[styles.button, styles.updateButton]}
-                    onPress={() => handleSubmit()}
-                  >
-                    <Text style={styles.buttonText}>Actualizar</Text>
-                  </TouchableOpacity>
-                </View>
-              </>
-            )}
-          </Formik>
+              </Formik>
+            </>
+          )}
         </View>
       </View>
     </Modal>
@@ -156,6 +184,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     marginBottom: 20,
+    textAlign: "center",
   },
   input: {
     width: "100%",
@@ -191,6 +220,17 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "white",
     fontSize: 16,
+  },
+  feedbackMessage: {
+    fontSize: 16,
+    textAlign: "center",
+    marginBottom: 20,
+  },
+  feedbackButton: {
+    backgroundColor: "#007BFF",
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 5,
   },
 });
 

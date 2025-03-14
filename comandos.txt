@@ -1,3 +1,4 @@
 eas build -p android --profile production 
 eas build -p android --profile preview
+npx expo export --platform web 
 eas deploy --prod

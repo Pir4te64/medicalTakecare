@@ -66,7 +66,7 @@ const HomeComponent = () => {
   }, []);
   useEffect(() => {
     const saveTipoCuenta = async () => {
-      if (profile?.tipoCuenta) {
+      if (profile?.role) {
         try {
           await AsyncStorage.setItem("tipoCuenta", profile.tipoCuenta);
         } catch (error) {
