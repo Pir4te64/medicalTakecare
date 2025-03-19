@@ -9,7 +9,7 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { useFocusEffect } from "@react-navigation/native"; // 👈 Importar useFocusEffect
+import { useFocusEffect } from "@react-navigation/native";
 import HomeComponent from "@/components/Home/Home";
 
 export default function HomeScreen() {
@@ -17,7 +17,6 @@ export default function HomeScreen() {
   const [tipoCuenta, setTipoCuenta] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Función para obtener el tipo de cuenta
   const fetchTipoCuenta = async () => {
     try {
       const storedTipo = await AsyncStorage.getItem("tipoCuenta");
@@ -29,15 +28,13 @@ export default function HomeScreen() {
     }
   };
 
-  // Se ejecuta cada vez que la pantalla recibe enfoque
   useFocusEffect(
     useCallback(() => {
-      setLoading(true); // Reiniciar el loading cada vez que se ejecuta
+      setLoading(true);
       fetchTipoCuenta();
     }, [])
   );
 
-  // Mientras carga, mostrar un spinner
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -48,15 +45,12 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Sección principal */}
       <View style={styles.content}>
         <HomeComponent />
       </View>
 
-      {/* Sección de botones */}
-      <View style={styles.buttonsContainer}>
+      {/* <View style={styles.buttonsContainer}>
         <View style={styles.miniContainer}>
-          {/* Botón Registro (solo si tipoCuenta !== "D") */}
           {tipoCuenta !== "D" && (
             <TouchableOpacity
               style={styles.button}
@@ -66,7 +60,6 @@ export default function HomeScreen() {
             </TouchableOpacity>
           )}
 
-          {/* Botón Perfil */}
           <TouchableOpacity
             style={styles.button}
             onPress={() => router.push("/home/profile")}>
@@ -74,7 +67,6 @@ export default function HomeScreen() {
             <Text style={styles.buttonText}>Perfil</Text>
           </TouchableOpacity>
 
-          {/* Botón Ajustes */}
           <TouchableOpacity
             style={styles.button}
             onPress={() => router.push("/home/SettingScreen")}>
@@ -82,18 +74,18 @@ export default function HomeScreen() {
             <Text style={styles.buttonText}>Ajustes</Text>
           </TouchableOpacity>
         </View>
-      </View>
+      </View> */}
     </View>
   );
 }
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    maxWidth: 375, // Limita el ancho para simular un dispositivo móvil
+    maxWidth: 375,
     width: "100%",
-    alignSelf: "center", // Centra el contenedor horizontalmente
+    alignSelf: "center",
     backgroundColor: "#f9f9f9",
-    height: "100vh", // Asegura que ocupe toda la altura de la ventana
+    height: "100vh",
   },
   content: {
     flex: 0.8,
@@ -116,9 +108,9 @@ const styles = StyleSheet.create({
   button: {
     borderRadius: 10,
     paddingVertical: 15,
-    paddingHorizontal: 10, // Se reduce el padding horizontal para evitar botones demasiado anchos
+    paddingHorizontal: 10,
     alignItems: "center",
-    width: 80, // Se define un ancho fijo para los botones
+    width: 80,
     marginBottom: 15,
   },
   buttonText: {

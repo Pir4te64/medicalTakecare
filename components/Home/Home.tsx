@@ -1,17 +1,20 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import {
   View,
   Text,
+  TouchableOpacity,
+  Pressable,
   Animated,
   ActivityIndicator,
-  StyleSheet,
   Platform,
 } from "react-native";
-import LottieView from "lottie-react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { API } from "@/utils/api";
 import CustomAlert from "@/components/Modal/Modal";
 import { LinearGradient } from "expo-linear-gradient";
+import { useRouter } from "expo-router";
+import { styles } from "./Home.styles";
+import getProfileHome from "./Home.GET";
 
 const HomeComponent = () => {
   const [profile, setProfile] = useState<any>(null);
@@ -21,36 +24,15 @@ const HomeComponent = () => {
   const [modalMessage, setModalMessage] = useState("");
   const [modalType, setModalType] = useState<"success" | "error">("success");
 
+  const router = useRouter();
   const imageScale = useRef(new Animated.Value(0.8)).current;
 
   // Lógica para obtener el perfil desde la API
   useEffect(() => {
-    const fetchProfile = async () => {
+    const fetchData = async () => {
       try {
-        const token = await AsyncStorage.getItem("authToken");
-        if (!token) {
-          throw new Error("No se encontró el token de autenticación");
-        }
-
-        const response = await fetch(`${API.PROFILE}`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error("Error al obtener el perfil");
-        }
-
-        const data = await response.json();
-
-        if (data.success) {
-          setProfile(data.body);
-        } else {
-          throw new Error(data.message || "Error desconocido");
-        }
+        const profileData = await getProfileHome();
+        setProfile(profileData);
       } catch (err) {
         if (err instanceof Error) {
           setError(err.message);
@@ -61,12 +43,13 @@ const HomeComponent = () => {
         setLoading(false);
       }
     };
-
-    fetchProfile();
+    fetchData();
   }, []);
+
+  // Guardar tipoCuenta en AsyncStorage si existe
   useEffect(() => {
     const saveTipoCuenta = async () => {
-      if (profile?.role) {
+      if (profile?.tipoCuenta) {
         try {
           await AsyncStorage.setItem("tipoCuenta", profile.tipoCuenta);
         } catch (error) {
@@ -74,10 +57,10 @@ const HomeComponent = () => {
         }
       }
     };
-
     saveTipoCuenta();
   }, [profile]);
 
+  // Animación de escala (solo para plataformas nativas)
   useEffect(() => {
     if (Platform.OS !== "web") {
       Animated.spring(imageScale, {
@@ -87,8 +70,36 @@ const HomeComponent = () => {
       }).start();
     }
   }, []);
+
+  // Función para navegar a "Datos de Emergencia"
+  const navigateToContactos = useCallback(() => {
+    router.replace(
+      `/home/profile/contactos?afiliado=${encodeURIComponent(
+        JSON.stringify(profile)
+      )}`
+    );
+  }, [router, profile]);
+
+  // Función para navegar a "Perfil de Identificación Médica"
+  const navigateToInformation = useCallback(() => {
+    router.replace(
+      `/home/profile/informacion?afiliado=${encodeURIComponent(
+        JSON.stringify(profile)
+      )}`
+    );
+  }, [router, profile]);
+
+  // Función para navegar a "Historial de Consultas Médicas"
+  const navigateToVisual = useCallback(() => {
+    router.replace(
+      `/home/profile/visual?afiliado=${encodeURIComponent(
+        JSON.stringify(profile)
+      )}`
+    );
+  }, [router, profile]);
+
   if (loading) {
-    return <ActivityIndicator size='large' color='#0066cc' />;
+    return <ActivityIndicator size="large" color="#0066cc" />;
   }
 
   return (
@@ -98,25 +109,89 @@ const HomeComponent = () => {
         colors={["#2470ec", "#005bb5"]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
-        style={styles.header}>
-        {/* Contenedor para centrar el contenido dinámicamente */}
+        style={styles.header}
+      >
         <View style={styles.headerContent}>
-          <Animated.View style={{ transform: [{ scale: imageScale }] }}>
-            <Animated.Image
-              source={require("../../assets/images/login2.png")}
-              style={[styles.image, { transform: [{ scale: imageScale }] }]}
-            />
-          </Animated.View>
-          <Text style={styles.welcomeText}>
-            ¡Hola, {profile?.nombre || "Usuario"}!
-          </Text>
+          <View style={styles.buttonsContainer}>
+            {/* 1. Menú de Administración */}
+            <TouchableOpacity
+              style={[styles.button, { backgroundColor: "#FF8A80" }]}
+              onPress={() => router.replace("/home/profile")}
+            >
+              <Text style={styles.buttonText}>Menú de Administración</Text>
+            </TouchableOpacity>
+
+            {/* 2. Perfil de Identificación Médica */}
+            <TouchableOpacity
+              style={[styles.button, { backgroundColor: "#FFD180" }]}
+              onPress={navigateToInformation}
+            >
+              <Text style={styles.buttonText}>
+                Perfil de Identificación Médica
+              </Text>
+            </TouchableOpacity>
+
+            {/* 3. Exámenes de Laboratorio */}
+            <TouchableOpacity
+              style={[styles.button, { backgroundColor: "#FFF59D" }]}
+              onPress={() => router.replace("/home/lector")}
+            >
+              <Text style={styles.buttonText}>Exámenes de Laboratorio</Text>
+            </TouchableOpacity>
+
+            {/* 4. Examen de Imagen */}
+            <TouchableOpacity
+              style={[styles.button, { backgroundColor: "#C5E1A5" }]}
+              onPress={() => router.replace("/home/lector/detalles")}
+            >
+              <Text style={styles.buttonText}>Examen de Imagen</Text>
+            </TouchableOpacity>
+
+            {/* 5. Recetas */}
+            <TouchableOpacity
+              style={[styles.button, { backgroundColor: "#80CBC4" }]}
+              onPress={() => router.replace("/home/lector/detalles")}
+            >
+              <Text style={styles.buttonText}>Recetas</Text>
+            </TouchableOpacity>
+
+            {/* 6. Historial de Consultas Médicas */}
+            <TouchableOpacity
+              style={[styles.button, { backgroundColor: "#81D4FA" }]}
+              onPress={navigateToVisual}
+            >
+              <Text style={styles.buttonText}>
+                Historial de Consultas Médicas
+              </Text>
+            </TouchableOpacity>
+
+            {/* 7. Próximo control (deshabilitado en web) */}
+            <Pressable
+              disabled={true}
+              style={({ hovered }) => [
+                styles.button,
+                { backgroundColor: "#82B1FF", opacity: hovered ? 0.5 : 1 },
+              ]}
+            >
+              <Text style={styles.buttonText}>Próximo Control</Text>
+              <Text style={styles.buttonTextSmall}>(Actualmente no disponible)</Text>
+            </Pressable>
+
+            {/* 8. Datos de Emergencia */}
+            <TouchableOpacity
+              style={[styles.button, { backgroundColor: "#B388FF" }]}
+              onPress={navigateToContactos}
+            >
+              <Text style={styles.buttonText}>Datos de Emergencia</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </LinearGradient>
 
       {/* Custom Alert */}
       <CustomAlert
         visible={modalVisible}
-        title='Salir'
+        title="Salir"
         message={modalMessage}
         type={modalType}
         onClose={() => setModalVisible(false)}
@@ -124,54 +199,5 @@ const HomeComponent = () => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#f9f9f9",
-  },
-  image: {
-    width: 250,
-    height: 250,
-    marginVertical: 30,
-    borderRadius: 10,
-  },
-  // Usamos flex para que el header ocupe el 40% de la pantalla
-  header: {
-    flex: 1,
-    width: "100%",
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-    borderBottomLeftRadius: 30,
-    borderBottomRightRadius: 30,
-    overflow: "hidden", // Asegura que los bordes redondeados se apliquen correctamente
-  },
-  // Contenedor que centra el contenido del header
-  headerContent: {
-    flex: 1,
-    justifyContent: "center", // Centrado vertical
-    alignItems: "center", // Centrado horizontal
-    paddingHorizontal: 20,
-  },
-  animation: {
-    width: 50,
-    height: 50,
-    marginBottom: 10, // Espacio entre la animación y el texto
-  },
-  welcomeText: {
-    fontSize: 20,
-    fontWeight: "600",
-    color: "white",
-    textAlign: "center",
-    // Puedes usar un marginTop si requieres un espacio adicional,
-    // o ajustar el padding en headerContent para mayor dinamismo.
-  },
-});
 
 export default HomeComponent;

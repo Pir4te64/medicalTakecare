@@ -179,8 +179,7 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   headerText: {
-    fontSize: 20,
-    fontWeight: "bold",
+    fontSize: 8,
     textAlign: "center",
     marginBottom: 15,
   },
