@@ -1,46 +1,73 @@
 // app/home/profile/_layout.tsx
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Stack } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const ProfileLayout = () => {
+  // Estado para guardar el color seleccionado (valor por defecto)
+  const [selectedColor, setSelectedColor] = useState("#0066cc");
+
+  useEffect(() => {
+    const fetchColor = async () => {
+      try {
+        const color = await AsyncStorage.getItem("selectedColor");
+        if (color) {
+          setSelectedColor(color);
+        }
+      } catch (error) {
+        console.error("Error al obtener el color:", error);
+      }
+    };
+
+    fetchColor();
+  }, []);
+
   return (
     <Stack>
       {/* Perfil Screen */}
       <Stack.Screen
-        name="index" // Perfil principal
+        name="index"
         options={{
           title: "Perfil",
-          headerShown: false, // No mostrar header en esta pantalla
+          headerStyle: { backgroundColor: "black" },
+          headerTintColor: "#fff", // Asegura buen contraste en el header
+        }}
+      />
+      {/* Pantalla para registrar información con color dinámico en el header */}
+      <Stack.Screen
+        name="informacion"
+        options={{
+          title: "Registro Información",
+          headerStyle: { backgroundColor: "orange" },
+          headerTintColor: "#fff", // Asegura buen contraste en el header
         }}
       />
       <Stack.Screen
-        name="informacion" // Pantalla para registrar información
+        name="detalle"
         options={{
-          title: "Registro Información", // Título personalizado
+          title: "Información Detalle",
         }}
       />
       <Stack.Screen
-        name="detalle" // Pantalla de detalle de la información
+        name="contactos"
         options={{
-          title: "Información Detalle", // Título personalizado
+          title: "Contactos",
+          headerStyle: { backgroundColor: "red" },
+          headerTintColor: "#fff", // Asegura buen contraste en el header
         }}
       />
       <Stack.Screen
-        name="contactos" // Pantalla de detalle de la información
+        name="historial"
         options={{
-          title: "Contactos", // Título personalizado
+          title: "Historial",
         }}
       />
       <Stack.Screen
-        name="historial" // Pantalla de detalle de la información
+        name="visual"
         options={{
-          title: "Historial", // Título personalizado
-        }}
-      />
-      <Stack.Screen
-        name="visual" // Pantalla de detalle de la información
-        options={{
-          title: "Visual", // Título personalizado
+          title: "Visual",
+          headerStyle: { backgroundColor: "#9B26B6" },
+          headerTintColor: "#fff", // Asegura buen contraste en el header
         }}
       />
     </Stack>

@@ -46,12 +46,12 @@ export const styles = StyleSheet.create({
   buttonText: {
     fontSize: 13,
     fontWeight: "600",
-    color: "#005bb5",
+    color: "white",
     textAlign: "center",
   },
   buttonTextSmall: {
     fontSize: 10,
-    color: "#005bb5",
+    color: "white",
     textAlign: "center",
   },
 });

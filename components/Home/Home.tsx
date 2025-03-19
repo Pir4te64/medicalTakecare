@@ -2,7 +2,6 @@ import React, { useEffect, useState, useRef, useCallback } from "react";
 import {
   View,
   Text,
-  TouchableOpacity,
   Pressable,
   Animated,
   ActivityIndicator,
@@ -71,7 +70,24 @@ const HomeComponent = () => {
     }
   }, []);
 
-  // Función para navegar a "Datos de Emergencia"
+  // Función para guardar el color seleccionado
+  const handleColorPress = async (
+    color: string,
+    callback: () => void = () => { }
+  ) => {
+    try {
+      await AsyncStorage.setItem("selectedColor", color);
+      // Podés verificar que se guardó correctamente o realizar otras acciones
+      console.log("Color guardado:", color);
+    } catch (error) {
+      console.error("Error al guardar el color:", error);
+    } finally {
+      // Llamar al callback para proceder con la navegación u otra acción
+      callback();
+    }
+  };
+
+  // Funciones para navegar
   const navigateToContactos = useCallback(() => {
     router.replace(
       `/home/profile/contactos?afiliado=${encodeURIComponent(
@@ -80,7 +96,6 @@ const HomeComponent = () => {
     );
   }, [router, profile]);
 
-  // Función para navegar a "Perfil de Identificación Médica"
   const navigateToInformation = useCallback(() => {
     router.replace(
       `/home/profile/informacion?afiliado=${encodeURIComponent(
@@ -89,7 +104,6 @@ const HomeComponent = () => {
     );
   }, [router, profile]);
 
-  // Función para navegar a "Historial de Consultas Médicas"
   const navigateToVisual = useCallback(() => {
     router.replace(
       `/home/profile/visual?afiliado=${encodeURIComponent(
@@ -114,76 +128,121 @@ const HomeComponent = () => {
         <View style={styles.headerContent}>
           <View style={styles.buttonsContainer}>
             {/* 1. Menú de Administración */}
-            <TouchableOpacity
-              style={[styles.button, { backgroundColor: "#FF8A80" }]}
-              onPress={() => router.replace("/home/profile")}
+            <Pressable
+              style={({ hovered }) => [
+                styles.button,
+                { backgroundColor: "black" },
+              ]}
+              onPress={() =>
+                handleColorPress("black", () =>
+                  router.replace("/home/profile")
+                )
+              }
             >
               <Text style={styles.buttonText}>Menú de Administración</Text>
-            </TouchableOpacity>
+            </Pressable>
 
             {/* 2. Perfil de Identificación Médica */}
-            <TouchableOpacity
-              style={[styles.button, { backgroundColor: "#FFD180" }]}
-              onPress={navigateToInformation}
+            <Pressable
+              style={({ hovered }) => [
+                styles.button,
+                { backgroundColor: "orange" },
+              ]}
+              onPress={() =>
+                handleColorPress("orange", navigateToInformation)
+              }
             >
               <Text style={styles.buttonText}>
-                Perfil de Identificación Médica
+                Perfil <br /> de Identificación Médica
               </Text>
-            </TouchableOpacity>
+            </Pressable>
 
             {/* 3. Exámenes de Laboratorio */}
-            <TouchableOpacity
-              style={[styles.button, { backgroundColor: "#FFF59D" }]}
-              onPress={() => router.replace("/home/lector")}
+            <Pressable
+              style={({ hovered }) => [
+                styles.button,
+                { backgroundColor: "blue" },
+              ]}
+              onPress={() =>
+                handleColorPress("blue", () =>
+                  router.replace("/home/lector")
+                )
+              }
             >
               <Text style={styles.buttonText}>Exámenes de Laboratorio</Text>
-            </TouchableOpacity>
+            </Pressable>
 
             {/* 4. Examen de Imagen */}
-            <TouchableOpacity
-              style={[styles.button, { backgroundColor: "#C5E1A5" }]}
-              onPress={() => router.replace("/home/lector/detalles")}
+            <Pressable
+              style={({ hovered }) => [
+                styles.button,
+                { backgroundColor: "#ffd000" },
+              ]}
+              onPress={() =>
+                handleColorPress("yellow", () =>
+                  router.replace("/home/lector/detalles")
+                )
+              }
             >
-              <Text style={styles.buttonText}>Examen de Imagen</Text>
-            </TouchableOpacity>
+              <Text style={{ color: "black" }}>Examen de Imagen</Text>
+            </Pressable>
 
             {/* 5. Recetas */}
-            <TouchableOpacity
-              style={[styles.button, { backgroundColor: "#80CBC4" }]}
-              onPress={() => router.replace("/home/lector/detalles")}
+            <Pressable
+              style={({ hovered }) => [
+                styles.button,
+                { backgroundColor: "green" },
+              ]}
+              onPress={() =>
+                handleColorPress("green", () =>
+                  router.replace("/home/lector/detalles")
+                )
+              }
             >
               <Text style={styles.buttonText}>Recetas</Text>
-            </TouchableOpacity>
+            </Pressable>
 
             {/* 6. Historial de Consultas Médicas */}
-            <TouchableOpacity
-              style={[styles.button, { backgroundColor: "#81D4FA" }]}
-              onPress={navigateToVisual}
+            <Pressable
+              style={({ hovered }) => [
+                styles.button,
+                { backgroundColor: "#9B26B6" },
+              ]}
+              onPress={() =>
+                handleColorPress("#9B26B6", navigateToVisual)
+              }
             >
               <Text style={styles.buttonText}>
                 Historial de Consultas Médicas
               </Text>
-            </TouchableOpacity>
+            </Pressable>
 
             {/* 7. Próximo control (deshabilitado en web) */}
             <Pressable
               disabled={true}
               style={({ hovered }) => [
                 styles.button,
-                { backgroundColor: "#82B1FF", opacity: hovered ? 0.5 : 1 },
+                { backgroundColor: "gray", opacity: hovered ? 0.5 : 1 },
               ]}
             >
               <Text style={styles.buttonText}>Próximo Control</Text>
-              <Text style={styles.buttonTextSmall}>(Actualmente no disponible)</Text>
+              <Text style={styles.buttonTextSmall}>
+                (Actualmente no disponible)
+              </Text>
             </Pressable>
 
             {/* 8. Datos de Emergencia */}
-            <TouchableOpacity
-              style={[styles.button, { backgroundColor: "#B388FF" }]}
-              onPress={navigateToContactos}
+            <Pressable
+              style={({ hovered }) => [
+                styles.button,
+                { backgroundColor: "red" },
+              ]}
+              onPress={() =>
+                handleColorPress("red", navigateToContactos)
+              }
             >
               <Text style={styles.buttonText}>Datos de Emergencia</Text>
-            </TouchableOpacity>
+            </Pressable>
           </View>
         </View>
       </LinearGradient>
