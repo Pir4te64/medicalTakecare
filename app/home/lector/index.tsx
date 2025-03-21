@@ -23,6 +23,7 @@ export default function Lector() {
       let result = await DocumentPicker.getDocumentAsync({
         type: "application/pdf",
       });
+      console.log(result);
 
       if (result.canceled) return;
 

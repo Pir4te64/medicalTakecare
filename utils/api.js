@@ -1,6 +1,7 @@
 //export const BASE_URL = "https://69.164.214.201:8443/recetary";
 //export const BASE_URL = "http://69.164.214.201:8080/recetary";
 export const BASE_URL = "https://tkarebox.com/recetary";
+//export const BASE_URL = "http://localhost:8080/recetary";
 export const API = {
   BASE_URL,
   REGISTER: `${BASE_URL}/user/register`,

@@ -10,7 +10,8 @@ const postRequest = async (formData, queryParams) => {
     }
 
     // Construir la URL final
-    const url = `http://69.164.214.201:8080/recetary/api/openai/analyze?${queryParams}`;
+    const url = `https://tkarebox.com/recetary/api/openai/analyze?${queryParams}`;
+    console.log(queryParams);
 
     // Realizar la solicitud POST con FormData
     const response = await fetch(url, {

@@ -36,6 +36,7 @@ export default function LoginComponent() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Accept": "*/*"
         },
         body: JSON.stringify({
           username: values.username.trim(),
